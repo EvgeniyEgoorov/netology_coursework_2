@@ -8,9 +8,6 @@ class User:
     def __init__(self):
         self.search_params = {}
 
-    def prinnt(self):
-        print(self.search_params)
-
     def token_param(self, user_id, session):
         session.new_message(user_id, """
             И самое главное - чтобы запустить поиск, нам нужен твой персональный токен! 
@@ -23,7 +20,6 @@ class User:
                         Начинаем поиск! 
                         """)
             session.search_candidates(user_id, user_auth, self.search_params)
-            # self.prinnt()
 
     def city_param(self, user_id, session):
         session.new_message(user_id, """
