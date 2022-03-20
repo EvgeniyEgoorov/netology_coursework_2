@@ -1,45 +1,74 @@
-import vk_api
-from vk_api.longpoll import VkLongPoll, VkEventType
-from auth import group_auth
-import handler
+from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import re
-import time
+from auth import group_auth
+from handler import Handler
 
-vk_session = vk_api.VkApi(token=group_auth)
-longpoll = VkLongPoll(vk_session)
 
-for event in longpoll.listen():
-    if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
-        if re.match(r'[А-Яа-яA-Za-z]', event.text):
-            handler.text_msg(event.user_id,
-                             """Вас приветствует VKinder - лучший сервис для знакомств!
-                                Начни поиск прямо сейчас! """)
-            time.sleep(0.8)
-            handler.text_msg(event.user_id, 'Для начала введи диапазон возраста (пример: от 18 до 20):')
+class User:
+    def __init__(self):
+        self.search_params = {}
 
-            for event in longpoll.listen():
-                if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
-                    if re.findall(r'\d\d', event.text):
-                        age_from = int(re.findall(r'\d\d', event.text)[0])
-                        age_to = int(re.findall(r'\d\d', event.text)[1])
-                        time.sleep(0.5)
-                        handler.text_msg(event.user_id, 'Теперь укажи пол (1-ж, 2-м, 0-любой):')
+    def prinnt(self):
+        print(self.search_params)
 
-                        for event in longpoll.listen():
-                            if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
-                                if re.findall(r'\d', event.text):
-                                    sex = int(re.findall(r'\d', event.text)[0])
-                                    time.sleep(0.5)
-                                    handler.text_msg(event.user_id, f'Укажи город, в котором ведешь поиск')
+    def token_param(self, user_id, session):
+        session.new_message(user_id, """
+            И самое главное - чтобы запустить поиск, нам нужен твой персональный токен! 
+            """)
+        text = session.listener()[1]
+        if re.match(r'[a-z0-9]*', text):
+            token = re.match(r'[a-z0-9]*', text)
+            user_auth = token[0]
+            session.new_message(user_id, """
+                        Начинаем поиск! 
+                        """)
+            session.search_candidates(user_id, user_auth, self.search_params)
+            # self.prinnt()
 
-                                    for event in longpoll.listen():
-                                        if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
-                                            if re.findall(r'[А-Яа-яA-Za-z]', event.text):
-                                                hometown = str(re.findall(r'[А-Яа-яA-Za-z]', event.text)[0])
-                                                time.sleep(0.5)
-                                                handler.text_msg(event.user_id, f'Мы начинаем поиск!')
-                                                time.sleep(1)
-                                                handler.text_msg(event.user_id, f'Вот кого нам удалось найти для тебя:')
-                                                handler.search_candidates(event.user_id, age_from,
-                                                                          age_to, sex, hometown)
-    continue
+    def city_param(self, user_id, session):
+        session.new_message(user_id, """
+            А в каком городе мы ведем поиск?
+            """)
+        text = session.listener()[1]
+        if re.match(r'[a-zа-я]*', text):
+            home_town = re.match(r'[a-zа-я]*', text)
+            self.search_params['home_town'] = home_town[0]
+            self.token_param(user_id, session)
+
+    def age_param(self, user_id, session):
+        session.new_message(user_id, """
+            Прекрасный выбор! Давай сузим круг поиска, укажи возраст в формате "от" и "до"
+            """)
+        text = session.listener()[1]
+        if re.findall(r'(?<!\d)\d{2}(?!\d)', text):
+            age_from = int(re.findall(r'(?<!\d)\d{2}(?!\d)', text)[0])
+            age_to = int(re.findall(r'(?<!\d)\d{2}(?!\d)', text)[1])
+            self.search_params['age_from'] = age_from
+            self.search_params['age_to'] = age_to
+            self.city_param(user_id, session)
+
+    def sex_param(self, user_id, session):
+        text = session.listener()[1]
+        if text == 'старт!':
+            session.new_message(user_id, """
+                Супер! Сначала определимся кого мы ищем - для этого:
+                нажми 1, если ищешь девушку, 2 - если парня, и 0 - если это неважно
+                """)
+            text = session.listener()[1]
+            if re.findall(r'(?<!\d)\d(?!\d)', text):
+                self.search_params['sex'] = text
+                self.age_param(user_id, session)
+
+    def get_started(self):
+        session = Handler(group_auth)
+        user_id = session.listener()[0]
+        session.new_message(user_id, "Привет! Это VKinder - лучший сервис для знакомств!")
+        keyboard = VkKeyboard(one_time=True)
+        keyboard.add_button("Старт!", VkKeyboardColor.PRIMARY)
+        session.new_message(user_id, 'Нажми Старт!, чтобы начать поиск!', keyboard)
+        self.sex_param(user_id, session)
+
+
+if __name__ == '__main__':
+    user = User()
+    user.get_started()
