@@ -1,6 +1,7 @@
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import re
 from handler import GetMatches, new_message, listener
+import db
 
 
 class User:
@@ -20,6 +21,8 @@ class User:
                         """)
             seeker = GetMatches(user_auth)
             seeker.search_candidates(user_id, self.search_params)
+        else:
+            new_message(user_id, "Некорректный ввод!")
 
     def city_param(self, user_id):
         new_message(user_id, """
@@ -30,6 +33,8 @@ class User:
             home_town = re.match(r'[a-zа-я]*', text)
             self.search_params['home_town'] = home_town[0]
             self.token_param(user_id)
+        else:
+            new_message(user_id, "Некорректный ввод!")
 
     def age_param(self, user_id):
         new_message(user_id, """
@@ -42,6 +47,8 @@ class User:
             self.search_params['age_from'] = age_from
             self.search_params['age_to'] = age_to
             self.city_param(user_id)
+        else:
+            new_message(user_id, "Некорректный ввод! Укажи возраст в формате 'от' и 'до'")
 
     def sex_param(self, user_id):
         text = listener()[1]
@@ -54,6 +61,8 @@ class User:
             if re.findall(r'(?<!\d)\d(?!\d)', text):
                 self.search_params['sex'] = text
                 self.age_param(user_id)
+            else:
+                new_message(user_id, "Некорректный ввод! Укажи соответствующий номер")
 
     def get_started(self):
         user_id = listener()[0]
@@ -61,6 +70,8 @@ class User:
         keyboard = VkKeyboard(one_time=True)
         keyboard.add_button("Старт!", VkKeyboardColor.PRIMARY)
         new_message(user_id, 'Нажми Старт!, чтобы начать поиск!', keyboard)
+        db.db()
+        db.user_db(user_id)
         self.sex_param(user_id)
 
 

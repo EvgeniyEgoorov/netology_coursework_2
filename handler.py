@@ -1,7 +1,10 @@
+from pprint import pprint
+
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from random import randrange
 from auth import group_auth
+import db
 
 group_session = vk_api.VkApi(token=group_auth)
 longpoll = VkLongPoll(group_session)
@@ -58,11 +61,12 @@ class GetMatches:
         items.sort(key=likes_and_comments_count)
         most_liked_photos = items[-3:]
         for photo in most_liked_photos:
+            db.photos_db(photo['owner_id'], photo['sizes'][-1]['url'])
             send_photo(user_id, photo['owner_id'], photo['id'])
 
     def search_candidates(self, user_id, search_params):
         params = {
-            'count': 20,
+            'count': 10,
             'fields': 'screen_name',
             'has_photo': 1
         }
@@ -70,3 +74,5 @@ class GetMatches:
         items = [item for item in response['items'] if not item['is_closed']]
         for candidate_id in items:
             self.get_photos(user_id, (candidate_id['id']))
+            db.candidate_db(candidate_id['id'])
+            db.user_to_candidates(user_id, candidate_id['id'])
