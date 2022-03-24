@@ -61,6 +61,7 @@ class GetMatches:
         items.sort(key=likes_and_comments_count)
         most_liked_photos = items[-3:]
         for photo in most_liked_photos:
+            print(type(photo['sizes'][-1]['url']))
             db.photos_db(photo['owner_id'], photo['sizes'][-1]['url'])
             send_photo(user_id, photo['owner_id'], photo['id'])
 

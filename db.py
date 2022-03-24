@@ -39,12 +39,11 @@ def candidate_db(candidate_id):
 
 
 def user_to_candidates(user_id, candidate_id):
-    connection.execute(f"INSERT INTO User_to_Candidates(user_id, candidates_id) VALUES ({user_id}, {candidate_id})")
+    connection.execute(f"INSERT INTO User_to_Candidates(candidates_id, user_id, ) VALUES ({candidate_id}, {user_id})")
 
 
 def photos_db(candidate_id, link):
-    connection.execute(f"INSERT INTO Candidates(user_id, candidates_id) VALUES ({candidate_id}, {link})")
-
+    connection.execute(f"INSERT INTO Photos(candidate_id, photo_link) VALUES ({candidate_id}, {link})")
 
 # def del_db():
 #     connection.execute("""
