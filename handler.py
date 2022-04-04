@@ -4,7 +4,6 @@ from random import randrange
 from auth import group_auth, user_auth
 import db
 
-
 group_session = vk_api.VkApi(token=group_auth)
 longpoll = VkLongPoll(group_session)
 
@@ -60,7 +59,7 @@ class GetMatches:
         most_liked_photos = items[-3:]
         for photo in most_liked_photos:
             # print(type(photo['sizes'][-1]['url']))
-            # db.photos_db(photo['owner_id'], photo['sizes'][-1]['url'])
+            db.photos_db(photo['sizes'][-1]['url'], photo['owner_id'])
             self.send_photo(photo['owner_id'], photo['id'])
 
     def search_candidates(self, search_params):
@@ -72,6 +71,6 @@ class GetMatches:
         response = self.session.method('users.search', {**search_params, **params})
         items = [item for item in response['items'] if not item['is_closed']]
         for candidate_id in items:
+            db.candidate_db(candidate_id['id'], candidate_id['first_name'], candidate_id['last_name'])
+            db.user_to_candidates(self.user_id, candidate_id['id'])
             self.get_photos(candidate_id['id'])
-            # db.candidate_db(candidate_id['id'])
-            # db.user_to_candidates(self.user_id, candidate_id['id'])

@@ -56,8 +56,8 @@ class User:
         keyboard = VkKeyboard(one_time=True)
         keyboard.add_button('Старт!', VkKeyboardColor.PRIMARY)
         handler.new_message('Нажми Старт!, чтобы начать поиск!', keyboard)
-        # db.db()
-        # db.user_db(user_id)
+        db.db()
+        db.user_db(user_id)
         self.sex_param(handler)
 
 
