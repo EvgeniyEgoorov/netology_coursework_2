@@ -57,9 +57,9 @@ class GetMatches:
 
         items.sort(key=likes_and_comments_count)
         most_liked_photos = items[-3:]
+        self.new_message(f'Ссылка на профиль: vk.com/id{owner_id}')
         for photo in most_liked_photos:
-            # print(type(photo['sizes'][-1]['url']))
-            db.photos_db(photo['sizes'][-1]['url'], photo['owner_id'])
+            db.photos_db(photo['owner_id'], photo['sizes'][-1]['url'])
             self.send_photo(photo['owner_id'], photo['id'])
 
     def search_candidates(self, search_params):

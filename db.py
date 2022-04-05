@@ -25,8 +25,8 @@ def db():
     );
     
     CREATE TABLE if not exists Photos (
-    photo_link VARCHAR(300),
-    candidate_id INTEGER REFERENCES Candidates(id)
+    candidate_id INTEGER REFERENCES Candidates(id),
+    photo_link VARCHAR(300)
     );
     """)
 
@@ -57,12 +57,12 @@ def user_to_candidates(user_id, candidate_id):
     connection.execute(insert_query, relation_data)
 
 
-def photos_db(link, candidate_id):
+def photos_db(candidate_id, link):
     insert_query = """
-    INSERT INTO Photos(photo_link, candidate_id) 
+    INSERT INTO Photos(candidate_id, photo_link) 
     VALUES (%s,%s)
     """
-    photos_data = (link, candidate_id)
+    photos_data = (candidate_id, link)
     connection.execute(insert_query, photos_data)
 
 
