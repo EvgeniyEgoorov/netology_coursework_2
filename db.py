@@ -1,9 +1,9 @@
 from sqlalchemy import exc
 import sqlalchemy.exc
-from auth import db_auth
+from auth import db_auth, db_name
 
 try:
-    db = f'postgresql://postgres:{db_auth}@localhost:5432/postgres'
+    db = f'postgresql://{db_name}:{db_auth}@localhost:5432/postgres'
     engine = sqlalchemy.create_engine(db)
     connection = engine.connect()
 except exc.SQLAlchemyError:
