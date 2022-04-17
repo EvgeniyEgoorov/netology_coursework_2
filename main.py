@@ -14,8 +14,8 @@ class User:
             """)
         text = listener()[1]
         if re.match(r'[a-zа-я]*', text):
-            home_town = re.match(r'[a-zа-я]*', text)
-            self.search_params['home_town'] = home_town[0]
+            hometown = re.match(r'[a-zа-я]*', text)
+            self.search_params['hometown'] = hometown[0]
             handler.new_message("Начинаем поиск!")
             handler.search_candidates(self.search_params)
         else:
